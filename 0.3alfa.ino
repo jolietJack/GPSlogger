@@ -11,8 +11,6 @@ File GPS_datalog;
 File GPS_config;
 char directory[22];
 
-char incomingByte;
-
 long timer_scatto = 5000;
 long n_foto = 0;
 
@@ -55,10 +53,10 @@ bool encodeGGA(){
     * Check the Valid Fix of the message too.
     ************************************************************/
     char message [70];
-    int c, i;
-    int k = 0;
-    int comma = 0;
-
+    
+    int c, i, k;
+    int comma;
+    
     int temp_int;
 
     char buf10[11];
@@ -273,7 +271,10 @@ void setup(){
 
     pinMode(2, OUTPUT);
     pinMode(3, OUTPUT);
-
+    
+    pinMode(7, OUTPUT);
+    pinMode(8, INPUT);
+    
     while(!Serial){
         delay(500);
     }
@@ -376,24 +377,31 @@ void setup(){
             GPS_datalog.close();
         }
     }while(error == true);
-
+    
     digitalWrite(2, HIGH);
-    delay(2000);
+    while(digitalRead(8)){
+        ;
+    }
     digitalWrite(2, LOW);
 }
 
 void loop(){
-    temp = millis();
-
-    if(mode == 1){
-        while(millis() - temp <= timer_scatto){}
+    if(digitalRead(8)){
+        mode = 1;
+        temp = millis();
+    }else{
+        mode = 0;
+    }
+    
+    if(mode == 1 && millis() - temp >= timer_scatto){
         if(encodeGGA()){
+            digitalWrite(7,HIGH);
             digitalWrite(2, HIGH);
             n_foto = printCoords(n_foto);
+            digitalWrite(7, LOW);
             digitalWrite(2, LOW);
         }else{
             Serial.println(F("[ERROR] Main: coordinate non valide"));
         }
     }
-
 }
