@@ -29,10 +29,8 @@ unsigned long temp;
 byte mode = 1;
 
 bool validFix(){
-    /************************************************
-    * Return true if valid fix is available, return
-    * false if no valid fix is available in a second
-    *************************************************/
+    //True -> valid fix trovato
+    //False -> valid fix non trovato (timeout 1s)
     if(gps.available()){
         if(gps.find(",A*")){
             return true;
@@ -47,11 +45,8 @@ bool validFix(){
 }
 
 bool encodeGGA(){
-    /************************************************************
-    * Encode GPGGA message: return true if the message was
-    * correctly encoded. Save the needed data into global variable.
-    * Check the Valid Fix of the message too.
-    ************************************************************/
+    //True -> coordinate valide
+    //False -> coordinate non valide
     char message [70];
     
     int c, i, k;
@@ -150,6 +145,8 @@ bool encodeGGA(){
 }
 
 bool encodeRMC(char *date, long *time){
+    //True -> date e ora validi
+    //False -> data e ora non validi
     int i, j, k;
     int check;
     int ciao;
@@ -218,6 +215,9 @@ bool encodeRMC(char *date, long *time){
 }
 
 long readConfigVar(int var){
+    //var1 = timer scatto
+    //var2 = nfoto
+    //return: valore della variabile
     int c;
     char message[10];
     long conf_var;
@@ -244,6 +244,8 @@ long readConfigVar(int var){
 }
 
 long printCoords(long numb){
+    //numb = numero foto
+    //return: numer foto + 1
     GPS_datalog = SD.open(directory, FILE_WRITE);
 
     if(!GPS_datalog){
