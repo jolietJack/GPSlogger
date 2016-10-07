@@ -1,7 +1,6 @@
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <SD.h>
-//#include <math.h>
 
 #define CS 10
 
@@ -30,69 +29,6 @@ bool test = false;
 bool error = false;
 unsigned long temp;
 byte mode = 1;
-
-/*
-double toRad(double deg){
-    double rad = 2 * M_PI / 360;
-    return rad;
-}
-*/
-
-/*
-double lawOfCos(double lat1, double lat2, double lon1, double lon2){
-    double d;
-    double temp1;
-    double temp2;
-
-    temp1 = sin(toRad(lat1)) * sin(toRad(lat2));
-    temp2 = cos(toRad(lon1)) * cos(toRad(lon2)) * cos(toRad(lon2 - lon1));
-
-    d = acos(temp1 + temp2) * R;
-
-    return d;
-}
-*/
-
-/*
-void writeConfig(){
-    // Read the variable from the config.txt file.
-    // Return the variable in the line given as
-    // input.
-
-    long conf_var;
-
-    GPS_config = SD.open("config.txt", FILE_WRITE);
-    Serial.println(F("> Apertura del config file per la scrittura"));
-    if(!GPS_config){
-        Serial.println(F("[ERROR] Config write: impossibile aprire config file"));
-    }
-
-    GPS_config.seek(0);
-
-    Serial.println(F("Inserire il valore timer_scatto"));
-    while(Serial.available() == 0){
-        ;
-    }
-    conf_var = Serial.parseInt();
-
-    GPS_config.find("timer=");
-    GPS_config.print(conf_var);
-    GPS_config.print("]   ");
-
-    Serial.println(F("Inserire il valore n_foto"));
-    while(Serial.available() == 0){
-        ;
-    }
-    conf_var = Serial.parseInt();
-
-    GPS_config.find("nfoto=");
-    GPS_config.print(conf_var);
-    GPS_config.print("]   ");
-
-    GPS_config.close();
-    Serial.println("> Salvataggio config file");
-}
-*/
 
 bool validFix(){
     /************************************************
@@ -216,12 +152,6 @@ bool encodeGGA(){
 }
 
 bool encodeRMC(char *date, long *time){
-    /****************************************************
-    * Encode GPRMC message: return true if the message was
-    * correctly encoded. Save the date in the format needed
-    * for naming the working folder (gg_mm_yy).
-    ****************************************************/
-
     int i, j, k;
     int check;
     int ciao;
@@ -290,11 +220,6 @@ bool encodeRMC(char *date, long *time){
 }
 
 long readConfigVar(int var){
-    /*********************************************
-    * Read the variable from the config.txt file.
-    * Return the variable in the line given as
-    * input.
-    **********************************************/
     int c;
     char message[10];
     long conf_var;
@@ -321,9 +246,8 @@ long readConfigVar(int var){
 }
 
 long printCoords(long numb){
-    //Stampa i dati sul file di log
     GPS_datalog = SD.open(directory, FILE_WRITE);
-    //Serial.println(F("> Apertura datalog per la scrittura"));
+
     if(!GPS_datalog){
         Serial.println(F("[ERROR] Coords print: impossibile aprire il file"));
     }
@@ -338,17 +262,13 @@ long printCoords(long numb){
     Serial.print(longitude, 4); Serial.print(",");
     Serial.println(elevation, 1);
 
-    //Chiude il file per salvarlo
     GPS_datalog.close();
-    //Serial.println("> Salvataggio datalog");
 
     return numb+1;
 
 }
 
 void setup(){
-    /*============================================================================*/
-    // PC Serial baudrate
     Serial.begin(115200);
 
     pinMode(2, OUTPUT);
@@ -358,7 +278,6 @@ void setup(){
         delay(500);
     }
 
-    // GPS Serial baudrate
     gps.begin(38400);
     gps.setTimeout(1000);
 
@@ -386,18 +305,12 @@ void setup(){
 
         delay(1000);
 
-        /*============================================================================*/
-        //Lettura delle variabili da config.txt e creazione del file se non presente
         if(!error){
             if(SD.exists("config.txt")){
                 Serial.println(F("> Config file gia' esistente"));
                 Serial.println(F("> Estrazione valori dal file config"));
                 timer_scatto = readConfigVar(1);
-                //Serial.print(F("timer_scatto = "));
-                //Serial.println(timer_scatto);
                 n_foto = readConfigVar(2);
-                //Serial.print(F("n_foto = "));
-                //Serial.println(n_foto);
             }else{
                 Serial.println(F("> Creazione config file"));
 
@@ -422,7 +335,6 @@ void setup(){
             }
         }
 
-        // Check if the current folder exists, and get the filename.
         if((!SD.exists(date)) && (!error)){
             test = SD.mkdir(date);
 
@@ -465,44 +377,12 @@ void setup(){
         }
     }while(error == true);
 
-    /*
-    //Serial.println(F("Vuoi cambiare i valori del file di config? y/n"));
-    while(Serial.available() == 0){
-        ;
-    }
-    */
-
-
-    /*
-    incomingByte = Serial.read();
-
-    if(incomingByte == 'y'){
-        writeConfig();
-    }
-    */
-
     digitalWrite(2, HIGH);
     delay(2000);
     digitalWrite(2, LOW);
 }
 
 void loop(){
-    /*
-    if(digitalRead(9) == HIGH && mode == 0){
-        if(timer_scatto != 0){
-            mode = 1;
-            temp = millis();
-        }else{
-            if(encodeGGA()){
-                n_foto = printCoords(n_foto);
-
-            }else{
-                Serial.println(F("[ERROR] Main: coordinate non valide"));
-            }
-        }
-    }
-    */
-
     temp = millis();
 
     if(mode == 1){
